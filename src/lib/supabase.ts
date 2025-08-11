@@ -35,6 +35,12 @@ export interface Task {
   updated_at: string
   user_id: string
   tags?: string[]
+  estimated_time?: number // 预估时间（分钟）
+  parent_id?: string // 父任务ID，用于子任务
+  actual_time?: number // 实际花费时间（分钟）
+  progress?: number // 任务进度 0-100
+  assignee?: string // 负责人
+  difficulty?: 'easy' | 'medium' | 'hard' // 难度等级
 }
 
 export interface KnowledgePoint {

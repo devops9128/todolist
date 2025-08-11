@@ -125,7 +125,7 @@ const Layout: React.FC = () => {
                 <div className="flex items-center space-x-2">
                   <UserIcon className="h-6 w-6 text-gray-400" />
                   <span className="text-sm font-medium text-gray-700 hidden sm:block">
-                    {user.email}
+                    {user.email?.split('@')[0] || user.email}
                   </span>
                 </div>
                 <button

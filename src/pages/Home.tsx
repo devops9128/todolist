@@ -174,51 +174,49 @@ const Home: React.FC = () => {
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-yellow-100 to-orange-100 rounded-full translate-y-12 -translate-x-12 opacity-50"></div>
         
         <div className="relative p-8">
-          <div className="flex items-start justify-between">
+          <div className="flex items-center justify-between">
             {/* 左侧：问候和用户信息 */}
-            <div className="flex-1">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <UserIcon className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    {React.createElement(getGreeting().icon, { 
-                      className: `h-5 w-5 ${getGreeting().color}` 
-                    })}
-                    <h1 className="text-2xl font-bold text-gray-900">
-                      {getGreeting().text}！
-                    </h1>
-                  </div>
-                  <p className="text-gray-600 text-sm mt-1">
-                    今天是 {format(new Date(), 'yyyy年MM月dd日 EEEE', { locale: zhCN })}
-                  </p>
-                </div>
+            <div className="flex items-center space-x-3 flex-shrink-0">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <UserIcon className="h-6 w-6 text-white" />
               </div>
-              
-              {/* 今日概览 */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">{stats.todayTasks.length}</div>
-                  <div className="text-xs text-gray-500">今日任务</div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  {React.createElement(getGreeting().icon, { 
+                    className: `h-5 w-5 ${getGreeting().color}` 
+                  })}
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    {getGreeting().text}！
+                  </h1>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">{getTodayProgress()}%</div>
-                  <div className="text-xs text-gray-500">今日进度</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">{stats.activeProjects}</div>
-                  <div className="text-xs text-gray-500">活跃项目</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-indigo-600">{formatTime(stats.todayStudyTime)}</div>
-                  <div className="text-xs text-gray-500">学习时长</div>
-                </div>
+                <p className="text-gray-600 text-sm mt-1">
+                  今天是 {format(new Date(), 'yyyy年MM月dd日 EEEE', { locale: zhCN })}
+                </p>
+              </div>
+            </div>
+            
+            {/* 中间：今日概览统计 - 均匀分布 */}
+            <div className="hidden md:flex items-center justify-evenly flex-1 mx-8">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{stats.todayTasks.length}</div>
+                <div className="text-xs text-gray-500">今日任务</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{getTodayProgress()}%</div>
+                <div className="text-xs text-gray-500">今日进度</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">{stats.activeProjects}</div>
+                <div className="text-xs text-gray-500">活跃项目</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-indigo-600">{formatTime(stats.todayStudyTime)}</div>
+                <div className="text-xs text-gray-500">学习时长</div>
               </div>
             </div>
             
             {/* 右侧：快速操作 */}
-            <div className="ml-8 flex flex-col space-y-3">
+            <div className="flex flex-col space-y-3 flex-shrink-0">
               <button 
                 onClick={() => setQuickAddType('task')}
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
@@ -233,6 +231,26 @@ const Home: React.FC = () => {
                 <PlusIcon className="h-4 w-4" />
                 <span>记录知识</span>
               </button>
+            </div>
+          </div>
+          
+          {/* 移动端：今日概览统计 */}
+          <div className="md:hidden mt-6 grid grid-cols-2 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600">{stats.todayTasks.length}</div>
+              <div className="text-xs text-gray-500">今日任务</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">{getTodayProgress()}%</div>
+              <div className="text-xs text-gray-500">今日进度</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-purple-600">{stats.activeProjects}</div>
+              <div className="text-xs text-gray-500">活跃项目</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-indigo-600">{formatTime(stats.todayStudyTime)}</div>
+              <div className="text-xs text-gray-500">学习时长</div>
             </div>
           </div>
           
