@@ -147,7 +147,7 @@ const Projects: React.FC = () => {
   }
   
   return (
-    <div className="p-6">
+    <div className="px-6 py-6">
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold text-gray-900">项目追踪</h1>

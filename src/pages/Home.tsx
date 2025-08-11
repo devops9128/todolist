@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { useStore } from '../store/useStore'
-import { PlusIcon, CalendarIcon, ClockIcon, TrendingUpIcon, CheckCircleIcon, PlayCircleIcon, PauseCircleIcon } from 'lucide-react'
-import { format, isToday, isTomorrow, isThisWeek } from 'date-fns'
+import { PlusIcon, CalendarIcon, ClockIcon, TrendingUpIcon, CheckCircleIcon, PlayCircleIcon, PauseCircleIcon, UserIcon, SunIcon, MoonIcon, CloudIcon } from 'lucide-react'
+import { format, isToday, isTomorrow, isThisWeek, getHours } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 
 const Home: React.FC = () => {
@@ -115,6 +115,22 @@ const Home: React.FC = () => {
     return `${mins}分钟`
   }
   
+  // 获取时间段问候语
+  const getGreeting = () => {
+    const hour = getHours(new Date())
+    if (hour < 6) return { text: '夜深了，注意休息', icon: MoonIcon, color: 'text-indigo-600' }
+    if (hour < 12) return { text: '早上好', icon: SunIcon, color: 'text-yellow-600' }
+    if (hour < 18) return { text: '下午好', icon: SunIcon, color: 'text-orange-600' }
+    return { text: '晚上好', icon: MoonIcon, color: 'text-purple-600' }
+  }
+  
+  // 获取今日进度
+  const getTodayProgress = () => {
+    const totalToday = stats.todayTasks.length
+    const completedToday = stats.todayTasks.filter(t => t.status === 'completed').length
+    return totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0
+  }
+  
   const getTaskStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
@@ -151,34 +167,101 @@ const Home: React.FC = () => {
   }
   
   return (
-    <div className="px-6 pt-4 pb-6">
-      {/* 欢迎区域 */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">欢迎回来！</h1>
-        <p className="text-gray-600 mt-2">
-          今天是 {format(new Date(), 'yyyy年MM月dd日 EEEE', { locale: zhCN })}
-        </p>
+    <div className="px-6 pb-6">
+      {/* 欢迎区域 - 重新设计 */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 rounded-2xl border border-gray-200 shadow-sm mb-8">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full -translate-y-16 translate-x-16 opacity-50"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-yellow-100 to-orange-100 rounded-full translate-y-12 -translate-x-12 opacity-50"></div>
+        
+        <div className="relative p-8">
+          <div className="flex items-start justify-between">
+            {/* 左侧：问候和用户信息 */}
+            <div className="flex-1">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <UserIcon className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    {React.createElement(getGreeting().icon, { 
+                      className: `h-5 w-5 ${getGreeting().color}` 
+                    })}
+                    <h1 className="text-2xl font-bold text-gray-900">
+                      {getGreeting().text}！
+                    </h1>
+                  </div>
+                  <p className="text-gray-600 text-sm mt-1">
+                    今天是 {format(new Date(), 'yyyy年MM月dd日 EEEE', { locale: zhCN })}
+                  </p>
+                </div>
+              </div>
+              
+              {/* 今日概览 */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">{stats.todayTasks.length}</div>
+                  <div className="text-xs text-gray-500">今日任务</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">{getTodayProgress()}%</div>
+                  <div className="text-xs text-gray-500">今日进度</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">{stats.activeProjects}</div>
+                  <div className="text-xs text-gray-500">活跃项目</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-indigo-600">{formatTime(stats.todayStudyTime)}</div>
+                  <div className="text-xs text-gray-500">学习时长</div>
+                </div>
+              </div>
+            </div>
+            
+            {/* 右侧：快速操作 */}
+            <div className="ml-8 flex flex-col space-y-3">
+              <button 
+                onClick={() => setQuickAddType('task')}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                <PlusIcon className="h-4 w-4" />
+                <span>新建任务</span>
+              </button>
+              <button 
+                onClick={() => setQuickAddType('knowledge')}
+                className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+              >
+                <PlusIcon className="h-4 w-4" />
+                <span>记录知识</span>
+              </button>
+            </div>
+          </div>
+          
+          {/* 今日任务进度条 */}
+          {stats.todayTasks.length > 0 && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">今日任务进度</span>
+                <span className="text-sm text-gray-500">
+                  {stats.todayTasks.filter(t => t.status === 'completed').length} / {stats.todayTasks.length}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${getTodayProgress()}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
       
-      {/* 统计卡片 */}
+      {/* 详细统计卡片 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">今日任务</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.todayTasks.length}</p>
-              <p className="text-sm text-blue-600">需要完成</p>
-            </div>
-            <div className="p-3 bg-blue-100 rounded-full">
-              <CalendarIcon className="h-6 w-6 text-blue-600" />
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">任务完成率</p>
+              <p className="text-sm font-medium text-gray-600">总任务完成率</p>
               <p className="text-2xl font-bold text-gray-900">{stats.taskCompletionRate}%</p>
               <p className="text-sm text-green-600">{stats.completedTasks}/{stats.totalTasks} 已完成</p>
             </div>
@@ -191,12 +274,12 @@ const Home: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">活跃项目</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.activeProjects}</p>
-              <p className="text-sm text-purple-600">进行中</p>
+              <p className="text-sm font-medium text-gray-600">进行中任务</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.inProgressTasks}</p>
+              <p className="text-sm text-blue-600">正在处理</p>
             </div>
-            <div className="p-3 bg-purple-100 rounded-full">
-              <TrendingUpIcon className="h-6 w-6 text-purple-600" />
+            <div className="p-3 bg-blue-100 rounded-full">
+              <PlayCircleIcon className="h-6 w-6 text-blue-600" />
             </div>
           </div>
         </div>
@@ -204,12 +287,25 @@ const Home: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">今日学习</p>
-              <p className="text-2xl font-bold text-gray-900">{formatTime(stats.todayStudyTime)}</p>
-              <p className="text-sm text-indigo-600">累计时间</p>
+              <p className="text-sm font-medium text-gray-600">已完成项目</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.completedProjects}</p>
+              <p className="text-sm text-purple-600">项目成果</p>
+            </div>
+            <div className="p-3 bg-purple-100 rounded-full">
+              <CheckCircleIcon className="h-6 w-6 text-purple-600" />
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600">知识点总数</p>
+              <p className="text-2xl font-bold text-gray-900">{knowledgePoints.length}</p>
+              <p className="text-sm text-indigo-600">学习积累</p>
             </div>
             <div className="p-3 bg-indigo-100 rounded-full">
-              <ClockIcon className="h-6 w-6 text-indigo-600" />
+              <div className="h-6 w-6 text-indigo-600 flex items-center justify-center text-sm font-bold">📚</div>
             </div>
           </div>
         </div>

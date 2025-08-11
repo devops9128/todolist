@@ -1,6 +1,5 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Outlet, Link, useLocation } from 'react-router-dom'
-import { useStore } from '../store/useStore'
 import { useAuth } from '../hooks/useAuth'
 import {
   HomeIcon,
@@ -9,15 +8,32 @@ import {
   FolderIcon,
   BarChart3Icon,
   MenuIcon,
-  XIcon,
   LogOutIcon,
   UserIcon
 } from 'lucide-react'
 
 const Layout: React.FC = () => {
-  const { sidebarOpen, setSidebarOpen } = useStore()
   const { user, signOut } = useAuth()
   const location = useLocation()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+  
+  // 点击外部关闭菜单
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [menuOpen])
   
   const navigation = [
     { name: '主页', href: '/', icon: HomeIcon },
@@ -33,34 +49,19 @@ const Layout: React.FC = () => {
   
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 移动端侧边栏遮罩 */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-      
-      {/* 侧边栏 */}
-      <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
-            <h1 className="text-xl font-bold text-gray-900">学习助手</h1>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-            >
-              <XIcon className="h-6 w-6" />
-            </button>
+      {/* 顶部横向标题栏 */}
+      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
+        <div className="flex items-center justify-between h-16 px-6">
+          {/* 左侧：学习助手标题 */}
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <BookOpenIcon className="h-5 w-5 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">学习助手</h1>
           </div>
           
-          {/* 导航菜单 */}
-          <nav className="flex-1 px-4 py-4 space-y-2">
+          {/* 中间：导航菜单 */}
+          <nav className="hidden md:flex items-center space-x-8">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href
               return (
@@ -72,42 +73,76 @@ const Layout: React.FC = () => {
                       ? 'bg-blue-100 text-blue-700'
                       : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                   }`}
-                  onClick={() => setSidebarOpen(false)}
                 >
-                  <item.icon className="mr-3 h-5 w-5" />
+                  <item.icon className="mr-2 h-4 w-4" />
                   {item.name}
                 </Link>
               )
             })}
           </nav>
           
-          {/* 用户信息 */}
-          {user && (
-            <div className="border-t border-gray-200 p-4">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <UserIcon className="h-8 w-8 text-gray-400" />
+          {/* 右侧：用户信息和移动端菜单 */}
+          <div className="flex items-center space-x-3">
+            {/* 移动端菜单按钮 */}
+             <div className="md:hidden relative" ref={menuRef}>
+               <button
+                 onClick={() => setMenuOpen(!menuOpen)}
+                 className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+               >
+                 <MenuIcon className="h-6 w-6" />
+               </button>
+               
+               {/* 移动端下拉菜单 */}
+               {menuOpen && (
+                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+                  <div className="py-1">
+                    {navigation.map((item) => {
+                      const isActive = location.pathname === item.href
+                      return (
+                        <Link
+                          key={item.name}
+                          to={item.href}
+                          className={`flex items-center px-4 py-2 text-sm transition-colors ${
+                            isActive
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                          }`}
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          <item.icon className="mr-3 h-4 w-4" />
+                          {item.name}
+                        </Link>
+                      )
+                    })}
+                  </div>
                 </div>
-                <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+              )}
+            </div>
+            
+            {/* 用户信息 */}
+            {user && (
+              <>
+                <div className="flex items-center space-x-2">
+                  <UserIcon className="h-6 w-6 text-gray-400" />
+                  <span className="text-sm font-medium text-gray-700 hidden sm:block">
                     {user.email}
-                  </p>
+                  </span>
                 </div>
                 <button
                   onClick={handleSignOut}
-                  className="ml-3 p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+                  className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
                   title="退出登录"
                 >
                   <LogOutIcon className="h-5 w-5" />
                 </button>
-              </div>
-            </div>
-          )}
+              </>
+            )}
+          </div>
         </div>
       </div>
-      
+
       {/* 主内容区域 */}
-      <div className="lg:pl-64">
+      <div className="pt-16">
         {/* 页面内容 */}
         <main className="flex-1">
           <Outlet />
