@@ -13,6 +13,24 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* 现代强制颜色模式支持，替代已弃用的 -ms-high-contrast */
+@media (forced-colors: active) {
+  :root {
+    forced-color-adjust: auto;
+  }
+  
+  /* 确保在强制颜色模式下的可访问性 */
+  .bg-gradient-to-br,
+  .bg-gradient-to-r {
+    background: ButtonFace;
+    color: ButtonText;
+  }
+  
+  button, .btn {
+    border: 1px solid ButtonText;
+  }
+}
+
 /* 文本截断样式 */
 .line-clamp-2 {
   display: -webkit-box;

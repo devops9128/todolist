@@ -9,11 +9,12 @@ import {
   BarChart3Icon,
   MenuIcon,
   LogOutIcon,
-  UserIcon
+  UserIcon,
+  ShieldCheckIcon
 } from 'lucide-react'
 
 const Layout: React.FC = () => {
-  const { user, signOut } = useAuth()
+  const { user, signOut, hasAccess, userPermission } = useAuth()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -35,12 +36,16 @@ const Layout: React.FC = () => {
     }
   }, [menuOpen])
   
+  // 检查是否为管理员（这里简化为检查是否有权限，实际项目中可能需要更复杂的角色系统）
+  const isAdmin = hasAccess() && userPermission?.is_approved
+  
   const navigation = [
     { name: '主页', href: '/', icon: HomeIcon },
     { name: '任务管理', href: '/tasks', icon: CheckSquareIcon },
     { name: '知识库', href: '/knowledge', icon: BookOpenIcon },
     { name: '项目追踪', href: '/projects', icon: FolderIcon },
-    { name: '统计分析', href: '/analytics', icon: BarChart3Icon }
+    { name: '统计分析', href: '/analytics', icon: BarChart3Icon },
+    ...(isAdmin ? [{ name: '系统管理', href: '/admin', icon: ShieldCheckIcon }] : [])
   ]
   
   const handleSignOut = async () => {
